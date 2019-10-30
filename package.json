@@ -1,0 +1,37 @@
+{
+  "name": "cli-docs-generator",
+  "version": "1.0.0",
+  "description": "CLI allows you generate markdown docs for yargs CLI automatically",
+  "main": "src/cli.js",
+  "author": "Nikita Eliseev",
+  "license": "MIT",
+  "bin": {
+    "gen-cli-docs": "./src/cli.js"
+  },
+  "scripts": {
+    "eslint": "eslint ./",
+    "eslint:fix": "eslint ./ --fix"
+  },
+  "keywords": [
+    "generate",
+    "docs",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EliseevNP/cli-docs-generator.git"
+  },
+  "homepage": "https://github.com/EliseevNP/cli-docs-generator#readme",
+  "bugs": {
+    "url": "https://github.com/EliseevNP/cli-docs-generator/issues"
+  },
+  "dependencies": {
+    "yargs": "^14.2.0"
+  },
+  "devDependencies": {
+    "@bifot/eslint-config": "^1.0.2",
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2"
+  }
+}
