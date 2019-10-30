@@ -1,3 +1,3 @@
-module.exports = (helpOutput) => {
-  console.log(helpOutput)
+module.exports = (cliName, cliExe, helpOutput) => {
+  console.log('getCommands');
 }
