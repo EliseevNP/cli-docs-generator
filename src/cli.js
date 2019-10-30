@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-const { exec } = require('./helpers');
+const { exec, getCommands } = require('./helpers');
 const yargs = require('yargs');
+const fs = require('./utils/fs');
 
 const argv = yargs
   .locale('en')
@@ -21,20 +22,19 @@ const argv = yargs
   })
   .option('cli', {
     type: 'string',
-    demandOption: 'Please specify path to CLI (--cli)',
+    demandOption: 'Please specify path to the CLI (--cli)',
     description: 'Path to executable file of CLI for which documentation is generated',
     coerce: arg => {
-      console.log(arg.slice(0, 3))
       if (arg.slice(0, 2) === './' || arg.slice(0, 3) === '../' || arg[0] === '/') {
-        return `node ${arg} --help`;
+        return `node ${arg}`;
       } else {
-        return `${arg} --help`;
+        return arg;
       }
     },
   })
   .option('cli_name', {
     type: 'string',
-    description: 'String which replace default CLI name (default CLI name equal to value in --cli option)',
+    description: 'String which replace default CLI name (default CLI name equal to program name specified in --cli option)',
   })
   .example('\'$ $0 --cli=/path/to/cli.js --cli_name=my-cli\'', 'Generate markdown docs for \'my-cli\' CLI to the \'README.md\' file')
   .argv;
@@ -42,12 +42,16 @@ const argv = yargs
 async function main () {
   try {
     const { verbose, output, cli, cli_name } = argv;
+    const content = 
 
-    console.log(verbose, output, cli, cli_name);
-    
-    let res = await exec(cli);
+    const { stdout, stderr } = await exec(`${cli} --help`);
 
-    console.log(res)
+    if (stderr) {
+      console.log(`[ERROR] Generating docs failure${(argv.verbose) ? `\n${stderr}` : ''}`);
+      return;
+    }
+
+    console.log(stdout.split('\n'));
   } catch (err) {
     yargs.showHelp();
     console.log(`\n${err.message}`);
