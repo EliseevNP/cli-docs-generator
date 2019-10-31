@@ -1,8 +1,6 @@
-module.exports = license => {
-  return license
-    ? [
-        '## License',
-        `${license}.`,
-      ]
-    : [];
-};
+module.exports = license => (license
+  ? [
+    '## License',
+    `${license}.`,
+  ]
+  : []);

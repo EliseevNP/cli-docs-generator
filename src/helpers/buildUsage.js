@@ -1,7 +1,6 @@
-module.exports = (cliName, helpOutput) => {
-  return [
-    '## Usage',
-    `\`\`\`sh\n$ ${cliName} --help\n\`\`\``,
-    `\`\`\`\n${helpOutput}\`\`\``,
-  ];
-}
+module.exports = (cliName, helpOutput) => [
+  '## Usage',
+  `\`\`\`sh\n$ ${cliName} --help\n\`\`\``,
+  'Help output:',
+  `\`\`\`\n${helpOutput}\`\`\``,
+];
