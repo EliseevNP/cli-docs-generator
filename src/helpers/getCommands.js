@@ -1,9 +1,15 @@
 const exec = require('./exec');
 
 module.exports = async (cliName, cliExe, helpOutput) => {
-  const commands = await Promise.all(helpOutput
+  const commands = helpOutput
     .split('\n\n')[1]
-    .split('\n  ')
+    .split('\n  ');
+
+  if (commands[0] !== 'Commands:') {
+    return [];
+  }    
+
+  return await Promise.all(commands
     .slice(1)
     .map(command => new Promise(async (resolve, reject) => {
       try {
@@ -22,6 +28,4 @@ module.exports = async (cliName, cliExe, helpOutput) => {
         reject(err);
       }
     })));
-
-  return commands;
 };
