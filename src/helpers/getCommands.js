@@ -7,7 +7,7 @@ module.exports = async (cliName, cliExe, helpOutput) => {
 
   if (commands[0] !== 'Commands:') {
     return [];
-  }    
+  }
 
   return await Promise.all(commands
     .slice(1)

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const yargs = require('yargs');
+const { TEMP_DIR } = require('./constants');
 const {
   exec,
   fs,
@@ -30,21 +31,12 @@ const { argv } = yargs
   .option('cli', {
     type: 'string',
     demandOption: 'Please specify path to the CLI (--cli)',
-    description: 'Path to executable file of CLI for which documentation is generated',
-    coerce: arg => {
-      if (arg.slice(0, 2) === './' || arg.slice(0, 3) === '../' || arg[0] === '/') {
-        return {
-          exe: `node ${arg}`,
-          name: arg.slice(arg.lastIndexOf('/') + 1),
-        };
-      }
-
-      return { exe: arg, name: arg };
-    },
+    description: 'Path to executable file of the CLI for which documentation is generated (if --cli started with \'./\', \'../\' or \'/\', you can specify --pretty_cli_name otherwise --cli will be interpreted as the executable from the $PATH environment variable, and --pretty_cli_name will be ignored)',
+    coerce: arg => ({ exe: arg, name: arg }),
   })
   .option('pretty_cli_name', {
     type: 'string',
-    description: 'String which replace default CLI name (default CLI name equal to program name specified in --cli option)',
+    description: 'A string that replaces the program name specified in --cli (this parameter will be ignored if the --cli value does not start with \'./\', \'../\' or \'/\')',
   })
   .option('d', {
     type: 'string',
@@ -71,7 +63,27 @@ async function main() {
     license,
   } = argv;
 
+  const isRelativePath = cli.name.slice(0, 2) === './' || cli.name.slice(0, 3) === '../';
+  const isPath = isRelativePath || cli.name[0] === '/';
+
   try {
+    if (pretty_cli_name && isPath) {
+      if (isRelativePath) {
+        const { stdout } = await exec('pwd');
+
+        cli.exe = `${stdout.slice(0, -1)}/${cli.exe}`;
+      }
+
+      const prettyExePath = `${TEMP_DIR}/${pretty_cli_name}`;
+
+      await exec(`mkdir -p ${TEMP_DIR}`);
+      await exec(`rm -rf ${TEMP_DIR}/*`);
+      await exec(`ln -s '${cli.exe}' ${prettyExePath}`);
+
+      cli.name = pretty_cli_name;
+      cli.exe = prettyExePath;
+    }
+
     const { stdout: helpOutput, stderr } = await exec(`${cli.exe} --help`);
 
     if (stderr) {
@@ -87,12 +99,12 @@ async function main() {
       ...buildLicense(license),
     ];
 
-    fs.writeFile(output, content
-      .join('\n\n')
-      .replace(new RegExp(cli.name, 'g'), pretty_cli_name || cli.name));
+    fs.writeFile(output, content.join('\n\n'));
   } catch (err) {
     yargs.showHelp();
     console.log(`\n${verbose ? err : err.message}`);
+  } finally {
+    await exec(`rm -rf ${TEMP_DIR}`);
   }
 }
 
