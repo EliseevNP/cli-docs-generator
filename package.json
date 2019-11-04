@@ -1,6 +1,6 @@
 {
   "name": "cli-docs-generator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "This package allows you to generate markdown docs for yargs CLI",
   "main": "src/cli.js",
   "author": "Nikita Eliseev",
