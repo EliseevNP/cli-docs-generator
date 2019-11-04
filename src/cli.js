@@ -54,55 +54,46 @@ const { argv } = yargs
   .example('\'$ $0 --cli=./path/to/cli.js --pretty_cli_name=my-cli\'', 'Generate markdown docs for \'my-cli\' CLI to the \'README.md\' file');
 
 async function main() {
-  const {
-    verbose,
-    output,
-    cli,
-    pretty_cli_name,
-    description,
-    license,
-  } = argv;
-
-  const isRelativePath = cli.name.slice(0, 2) === './' || cli.name.slice(0, 3) === '../';
-  const isPath = isRelativePath || cli.name[0] === '/';
-
   try {
-    if (pretty_cli_name && isPath) {
+    const isRelativePath = argv.cli.name.slice(0, 2) === './' || argv.cli.name.slice(0, 3) === '../';
+    const isPath = isRelativePath || argv.cli.name[0] === '/';
+
+    if (argv.pretty_cli_name && isPath) {
       if (isRelativePath) {
         const { stdout } = await exec('pwd');
 
-        cli.exe = `${stdout.slice(0, -1)}/${cli.exe}`;
+        argv.cli.exe = `${stdout.slice(0, -1)}/${argv.cli.exe}`;
       }
 
-      const prettyExePath = `${TEMP_DIR}/${pretty_cli_name}`;
+      const prettyExePath = `${TEMP_DIR}/${argv.pretty_cli_name}`;
 
       await exec(`mkdir -p ${TEMP_DIR}`);
       await exec(`rm -rf ${TEMP_DIR}/*`);
-      await exec(`ln -s '${cli.exe}' ${prettyExePath}`);
+      await exec(`ln -s '${argv.cli.exe}' ${prettyExePath}`);
 
-      cli.name = pretty_cli_name;
-      cli.exe = prettyExePath;
+      argv.cli.name = argv.pretty_cli_name;
+      argv.cli.exe = prettyExePath;
     }
 
-    const { stdout: helpOutput, stderr } = await exec(`${cli.exe} --help`);
+    const { stdout: helpOutput, stderr } = await exec(`${argv.cli.exe} --help`);
 
     if (stderr) {
       throw new Error(stderr);
     }
 
-    const availableCommands = await getCommands(cli.name, cli.exe, helpOutput);
+    const availableCommands = await getCommands(argv.cli.name, argv.cli.exe, helpOutput);
 
     const content = [
-      ...buildHeader(cli.name, description),
-      ...buildUsage(cli.name, helpOutput),
-      ...buildAvailableCommands(cli.name, availableCommands),
-      ...buildLicense(license),
+      ...buildHeader(argv.cli.name, argv.description),
+      ...buildUsage(argv.cli.name, helpOutput),
+      ...buildAvailableCommands(argv.cli.name, availableCommands),
+      ...buildLicense(argv.license),
     ];
 
-    fs.writeFile(output, content.join('\n\n'));
+    fs.writeFile(argv.output, content.join('\n\n'));
   } catch (err) {
     yargs.showHelp();
-    console.log(`\n${verbose ? err : err.message}`);
+    console.log(`\n${argv.verbose ? err : err.message}`);
   } finally {
     await exec(`rm -rf ${TEMP_DIR}`);
   }
