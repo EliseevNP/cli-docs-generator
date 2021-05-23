@@ -7,5 +7,6 @@ module.exports = {
     'no-return-await': 'off',
     'arrow-parens': ['error', 'as-needed'],
     'arrow-body-style': ['error', 'as-needed'],
+    'max-len': 'off',
   }
 };
