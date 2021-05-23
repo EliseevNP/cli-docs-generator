@@ -1,21 +1,31 @@
 const exec = require('./exec');
 
-module.exports = async (cliName, cliExe, helpOutput) => {
-  const commands = helpOutput
-    .split('\n\n')[1]
-    .split('\n  ');
+const getCommands = async (cliName, cliExe, helpOutput, depth = 1, previousCommand = '') => {
+  const commandSection = helpOutput
+    .split('\n\n')
+    .find(section => section.startsWith('Commands:'));
 
-  if (commands[0] !== 'Commands:') {
-    return [];
-  }
+  const commands = commandSection
+    ? commandSection
+      .split('\n')
+      .slice(1)
+      .map(commandString => {
+        const command = commandString
+          .trim()
+          .replace(`${cliName} ${previousCommand}`, '')
+          .trim()
+          .split(' ')[0];
+
+        return previousCommand
+          ? `${previousCommand} ${command}`
+          : command;
+      })
+    : [];
 
   return await Promise.all(commands
-    .slice(1)
     .map(command => new Promise(async (resolve, reject) => {
       try {
-        const commandName = command.slice(cliName.length + 1, command.indexOf(' ', cliName.length + 1));
-
-        const { stdout, stderr } = await exec(`${cliExe} ${commandName} --help`);
+        const { stdout, stderr } = await exec(`${cliExe} ${command} --help`);
 
         if (stderr) {
           reject(stderr);
@@ -23,9 +33,14 @@ module.exports = async (cliName, cliExe, helpOutput) => {
           return;
         }
 
-        resolve({ name: commandName, helpOutput: stdout });
+        const nestedCommands = await getCommands(cliName, cliExe, stdout, depth + 1, command);
+
+        resolve([{ name: command, depth, helpOutput: stdout }, nestedCommands]);
       } catch (err) {
+        console.log('err', err);
         reject(err);
       }
     })));
 };
+
+module.exports = getCommands;
