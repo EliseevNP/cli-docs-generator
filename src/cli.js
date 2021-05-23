@@ -83,8 +83,6 @@ async function main() {
 
     const availableCommands = (await getCommands(argv.cli.name, argv.cli.exe, helpOutput)).flat(Infinity);
 
-    console.log('availableCommands', availableCommands);
-
     const content = [
       ...buildHeader(argv.cli.name, argv.description),
       ...buildUsage(argv.cli.name, helpOutput),
