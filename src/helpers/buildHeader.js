@@ -1,6 +1,6 @@
-module.exports = (cliName, description) => [
+module.exports = (cliName, description, npmRegistryNamespace) => [
   `# ${cliName}`,
   description,
   '## Install',
-  `\`\`\`sh\n$ npm i ${cliName} -g\n\`\`\``,
+  `\`\`\`sh\n$ npm i ${npmRegistryNamespace ? `@${npmRegistryNamespace}/${cliName}` : cliName} -g\n\`\`\``,
 ].filter(Boolean);

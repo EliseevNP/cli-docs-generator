@@ -38,6 +38,10 @@ const { argv } = yargs
     type: 'string',
     description: 'A string that replaces the program name specified in --cli (this parameter will be ignored if the --cli value does not start with \'./\', \'../\' or \'/\')',
   })
+  .option('npm_registry_namespace', {
+    type: 'string',
+    description: 'NPM registry namespace name of your package',
+  })
   .option('d', {
     type: 'string',
     alias: 'description',
@@ -84,7 +88,7 @@ async function main() {
     const availableCommands = (await getCommands(argv.cli.name, argv.cli.exe, helpOutput)).flat(Infinity);
 
     const content = [
-      ...buildHeader(argv.cli.name, argv.description),
+      ...buildHeader(argv.cli.name, argv.description, argv.npm_registry_namespace),
       ...buildUsage(argv.cli.name, helpOutput),
       ...buildAvailableCommands(argv.cli.name, availableCommands),
       ...buildLicense(argv.license),
