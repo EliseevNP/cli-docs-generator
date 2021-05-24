@@ -18,14 +18,15 @@ Help output:
 
 ```
 Options:
-  --version          Show version number  [boolean]
-  -v, --verbose      Show details about the result of running command  [boolean] [default: true]
-  -o, --output       Output file  [string] [default: "./README.md"]
-  --cli              Path to executable file of the CLI for which documentation is generated (if --cli started with './', '../' or '/', you can specify --pretty_cli_name otherwise --cli will be interpreted as the executable from the $PATH environment variable, and --pretty_cli_name will be ignored)  [string] [required]
-  --pretty_cli_name  A string that replaces the program name specified in --cli (this parameter will be ignored if the --cli value does not start with './', '../' or '/')  [string]
-  -d, --description  CLI description  [string]
-  -l, --license      License type  [string] [default: "MIT"]
-  -h, --help         Show help  [boolean]
+  --version                 Show version number  [boolean]
+  -v, --verbose             Show details about the result of running command  [boolean] [default: true]
+  -o, --output              Output file  [string] [default: "./README.md"]
+  --cli                     Path to executable file of the CLI for which documentation is generated (if --cli started with './', '../' or '/', you can specify --pretty_cli_name otherwise --cli will be interpreted as the executable from the $PATH environment variable, and --pretty_cli_name will be ignored)  [string] [required]
+  --pretty_cli_name         A string that replaces the program name specified in --cli (this parameter will be ignored if the --cli value does not start with './', '../' or '/')  [string]
+  --npm_registry_namespace  NPM registry namespace name of your package  [string]
+  -d, --description         CLI description  [string]
+  -l, --license             License type  [string] [default: "MIT"]
+  -h, --help                Show help  [boolean]
 
 Examples:
   '$ cli-docs-generator --cli=githelp'                                    Generate markdown docs for 'githelp' CLI to the 'README.md' file
