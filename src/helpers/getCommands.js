@@ -9,6 +9,7 @@ const getCommands = async (cliName, cliExe, helpOutput, depth = 1, previousComma
     ? commandSection
       .split('\n')
       .slice(1)
+      .filter(commandString => commandString.trim().startsWith(cliName))
       .map(commandString => {
         const command = commandString
           .trim()
