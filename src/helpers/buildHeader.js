@@ -1,6 +1,14 @@
-module.exports = (cliName, description, npmRegistryNamespace) => [
-  `# ${cliName}`,
-  description,
-  '## Install',
-  `\`\`\`sh\n$ npm i ${npmRegistryNamespace ? `@${npmRegistryNamespace}/${cliName}` : cliName} -g\n\`\`\``,
-].filter(Boolean);
+module.exports = (cliName, title, description, npmPackageName, npmRegistryNamespace) => {
+  let npmPackage = npmPackageName || cliName;
+
+  if (npmRegistryNamespace) {
+    npmPackage = `@${npmRegistryNamespace}/${npmPackage}`;
+  }
+
+  return [
+    `# ${title || cliName}`,
+    description,
+    '## Install',
+    `\`\`\`sh\n$ npm i ${npmPackage} -g\n\`\`\``,
+  ].filter(Boolean);
+};

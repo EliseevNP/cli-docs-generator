@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const yargs = require('yargs');
+const path = require('path');
 const { TEMP_DIR } = require('./constants');
 const {
   exec,
@@ -38,9 +39,18 @@ const { argv } = yargs
     type: 'string',
     description: 'A string that replaces the program name specified in --cli (this parameter will be ignored if the --cli value does not start with \'./\', \'../\' or \'/\')',
   })
+  .option('npm_package_name', {
+    type: 'string',
+    description: 'The name of your NPM package, for cases when it differs from the name of the CLI',
+  })
   .option('npm_registry_namespace', {
     type: 'string',
     description: 'NPM registry namespace name of your package',
+  })
+  .option('t', {
+    type: 'string',
+    alias: 'title',
+    description: 'The title of the generated page, defaults to the CLI name',
   })
   .option('d', {
     type: 'string',
@@ -62,21 +72,25 @@ async function main() {
     const isRelativePath = argv.cli.name.slice(0, 2) === './' || argv.cli.name.slice(0, 3) === '../';
     const isPath = isRelativePath || argv.cli.name[0] === '/';
 
-    if (argv.pretty_cli_name && isPath) {
-      if (isRelativePath) {
-        const { stdout } = await exec('pwd');
+    if (isPath) {
+      if (argv.pretty_cli_name) {
+        if (isRelativePath) {
+          const { stdout } = await exec('pwd');
 
-        argv.cli.exe = `${stdout.slice(0, -1)}/${argv.cli.exe}`;
+          argv.cli.exe = `${stdout.slice(0, -1)}/${argv.cli.exe}`;
+        }
+
+        const prettyExePath = `${TEMP_DIR}/${argv.pretty_cli_name}`;
+
+        await exec(`mkdir -p ${TEMP_DIR}`);
+        await exec(`rm -rf ${TEMP_DIR}/*`);
+        await exec(`ln -s '${argv.cli.exe}' ${prettyExePath}`);
+
+        argv.cli.name = argv.pretty_cli_name;
+        argv.cli.exe = prettyExePath;
+      } else {
+        argv.cli.name = path.basename(argv.cli.name);
       }
-
-      const prettyExePath = `${TEMP_DIR}/${argv.pretty_cli_name}`;
-
-      await exec(`mkdir -p ${TEMP_DIR}`);
-      await exec(`rm -rf ${TEMP_DIR}/*`);
-      await exec(`ln -s '${argv.cli.exe}' ${prettyExePath}`);
-
-      argv.cli.name = argv.pretty_cli_name;
-      argv.cli.exe = prettyExePath;
     }
 
     const { stdout: helpOutput, stderr } = await exec(`${argv.cli.exe} --help`);
@@ -88,7 +102,7 @@ async function main() {
     const availableCommands = (await getCommands(argv.cli.name, argv.cli.exe, helpOutput)).flat(Infinity);
 
     const content = [
-      ...buildHeader(argv.cli.name, argv.description, argv.npm_registry_namespace),
+      ...buildHeader(argv.cli.name, argv.title, argv.description, argv.npm_package_name, argv.npm_registry_namespace),
       ...buildUsage(argv.cli.name, helpOutput),
       ...buildAvailableCommands(argv.cli.name, availableCommands),
       ...buildLicense(argv.license),
